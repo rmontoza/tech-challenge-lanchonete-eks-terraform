@@ -78,14 +78,6 @@ resource "aws_subnet" "public_b" {
   map_public_ip_on_launch = true # Garantir que IPs públicos sejam atribuídos
 }
 
-resource "aws_route_table" "public_route_table" {
-  vpc_id = aws_vpc.main_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-}
 
 resource "aws_route_table_association" "public_a_assoc" {
   subnet_id      = aws_subnet.public_a.id
