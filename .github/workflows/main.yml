@@ -12,6 +12,7 @@ jobs:
   terraform:
     name: 'Terraform Apply'
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' # Só faz o deploy se estiver na branch 'main'
 
     steps:
       - name: 'Checkout code'
