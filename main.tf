@@ -28,6 +28,8 @@ resource "aws_eks_cluster" "eks_cluster" {
   name     = "lanhonete-eks-cluster"
   role_arn = aws_iam_role.eks_role.arn
 
+  version = "1.29"  # Especificar a versão do Kubernetes que você deseja usar
+
   vpc_config {
     subnet_ids = [aws_subnet.public_a.id, aws_subnet.public_b.id]
   }
@@ -66,12 +68,33 @@ resource "aws_subnet" "public_a" {
   vpc_id     = aws_vpc.main_vpc.id
   cidr_block = "172.31.0.0/20"
   availability_zone = "us-east-1a"
+  map_public_ip_on_launch = true # Garantir que IPs públicos sejam atribuídos
 }
 
 resource "aws_subnet" "public_b" {
   vpc_id     = aws_vpc.main_vpc.id
   cidr_block = "172.31.80.0/20"
   availability_zone = "us-east-1b"
+  map_public_ip_on_launch = true # Garantir que IPs públicos sejam atribuídos
+}
+
+resource "aws_route_table" "public_route_table" {
+  vpc_id = aws_vpc.main_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+}
+
+resource "aws_route_table_association" "public_a_assoc" {
+  subnet_id      = aws_subnet.public_a.id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
+resource "aws_route_table_association" "public_b_assoc" {
+  subnet_id      = aws_subnet.public_b.id
+  route_table_id = aws_route_table.public_route_table.id
 }
 
 resource "aws_eks_node_group" "node_group" {
