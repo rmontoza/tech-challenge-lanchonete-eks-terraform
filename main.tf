@@ -25,7 +25,7 @@ data "aws_eks_cluster_auth" "eks_auth" {
 }
 
 resource "aws_eks_cluster" "eks_cluster" {
-  name     = "my-eks-cluster"
+  name     = "lanhonete-eks-cluster"
   role_arn = aws_iam_role.eks_role.arn
 
   vpc_config {
@@ -34,7 +34,7 @@ resource "aws_eks_cluster" "eks_cluster" {
 }
 
 resource "aws_iam_role" "eks_role" {
-  name = "eks_role"
+  name = "lanchonete_eks_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -76,7 +76,7 @@ resource "aws_subnet" "public_b" {
 
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
-  node_group_name = "my-node-group"
+  node_group_name = "lanchonete-node-group"
   node_role_arn   = aws_iam_role.eks_node_role.arn
   subnet_ids      = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 
@@ -88,7 +88,7 @@ resource "aws_eks_node_group" "node_group" {
 }
 
 resource "aws_iam_role" "eks_node_role" {
-  name = "eks_node_role"
+  name = "lanchonete_eks_node_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -109,7 +109,7 @@ resource "aws_iam_role_policy_attachment" "node_policy_attachment" {
 
 resource "aws_iam_role_policy_attachment" "cni_policy_attachment" {
   role       = aws_iam_role.eks_node_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEKSCNIPolicy"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
 }
 
 resource "aws_iam_role_policy_attachment" "registry_policy_attachment" {
