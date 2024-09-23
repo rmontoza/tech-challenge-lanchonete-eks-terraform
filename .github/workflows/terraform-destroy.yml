@@ -1,0 +1,40 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    # Isso permite disparar manualmente o workflow do GitHub Actions.
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform:
+    name: Run Terraform Destroy
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout do repositório
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Configurar a versão do Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.5.0  # Ajuste para a versão que você está usando
+
+      # Configurar credenciais da AWS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1  # Ajuste para a sua região
+
+      # Inicializar o Terraform
+      - name: Terraform Init
+        run: terraform init
+
+      # Rodar o Terraform Destroy
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
