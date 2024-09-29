@@ -1,9 +1,8 @@
-# Provider AWS
 provider "aws" {
-  region = "us-east-1"  # Ajuste para a sua região
+  region = "us-east-1" 
 }
 
-# Criar VPC
+
 resource "aws_vpc" "main_vpc" {
   cidr_block = "10.0.0.0/16"
   enable_dns_support   = true
@@ -13,7 +12,7 @@ resource "aws_vpc" "main_vpc" {
   }
 }
 
-# Criar Internet Gateway
+
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main_vpc.id
   tags = {
@@ -21,7 +20,7 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-# Criar Tabela de Rotas Pública
+
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.main_vpc.id
   route {
@@ -33,7 +32,6 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
-# Criar Subnets Públicas
 resource "aws_subnet" "public_a" {
   vpc_id     = aws_vpc.main_vpc.id
   cidr_block = "10.0.1.0/24"
@@ -54,7 +52,6 @@ resource "aws_subnet" "public_b" {
   }
 }
 
-# Associar Tabela de Rotas com Subnets Públicas
 resource "aws_route_table_association" "public_a_assoc" {
   subnet_id      = aws_subnet.public_a.id
   route_table_id = aws_route_table.public_route_table.id
@@ -65,7 +62,6 @@ resource "aws_route_table_association" "public_b_assoc" {
   route_table_id = aws_route_table.public_route_table.id
 }
 
-# Criar o Security Group para o EKS
 resource "aws_security_group" "eks_security_group" {
   vpc_id = aws_vpc.main_vpc.id
 
@@ -88,7 +84,6 @@ resource "aws_security_group" "eks_security_group" {
   }
 }
 
-# Criar Role e Policies para o EKS Cluster
 resource "aws_iam_role" "eks_role" {
   name = "eks-cluster-role"
 
@@ -113,11 +108,10 @@ resource "aws_iam_role_policy_attachment" "eks_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
 }
 
-# Criar o Cluster EKS
 resource "aws_eks_cluster" "eks_cluster" {
   name     = "lanchonete-eks-cluster"
   role_arn = aws_iam_role.eks_role.arn
-  version  = "1.29"  # Definir a versão do Kubernetes
+  version  = "1.29"  
 
   vpc_config {
     subnet_ids = [aws_subnet.public_a.id, aws_subnet.public_b.id]
@@ -129,7 +123,6 @@ resource "aws_eks_cluster" "eks_cluster" {
   }
 }
 
-# Criar Role para os Nodes do EKS
 resource "aws_iam_role" "eks_node_role" {
   name = "lanchonete-eks-node-role"
 
@@ -149,7 +142,6 @@ resource "aws_iam_role" "eks_node_role" {
   }
 }
 
-# Anexar políticas necessárias para os Nodes
 resource "aws_iam_role_policy_attachment" "eks_worker_node_policy" {
   role       = aws_iam_role.eks_node_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
@@ -165,7 +157,6 @@ resource "aws_iam_role_policy_attachment" "eks_registry_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
 }
 
-# Criar o Node Group para o Cluster EKS
 resource "aws_eks_node_group" "node_group" {
   cluster_name    = aws_eks_cluster.eks_cluster.name
   node_group_name = "my-node-group"
@@ -178,7 +169,7 @@ resource "aws_eks_node_group" "node_group" {
     min_size     = 1
   }
 
-  ami_type = "AL2_x86_64"  # Usando Amazon Linux 2 como AMI para os Nodes
+  ami_type = "AL2_x86_64" 
 
   tags = {
     Name = "eks-node-group"
